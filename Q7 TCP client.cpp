@@ -8,22 +8,40 @@ using namespace std;
 int main() {
     int s = socket(AF_INET, SOCK_STREAM, 0);
     sockaddr_in a{};
+
     a.sin_family = AF_INET;
     a.sin_port = htons(8080);
-    a.sin_addr.s_addr = INADDR_ANY;
+    inet_pton(AF_INET, "127.0.0.1", &a.sin_addr);
 
-    bind(s, (sockaddr*)&a, sizeof(a));
-    listen(s, 1);
-    cout << "Waiting for client...\n";
+    if (connect(s, (sockaddr*)&a, sizeof(a)) < 0) {
+        cout << "Connection failed\n";
+        close(s);
+        return 1;
+    }
 
-    int c = accept(s, nullptr, nullptr);
-    char msg[1024] = {};
-    recv(c, msg, sizeof(msg)-1, 0);
-    cout << "Received: " << msg << '\n';
+    char msg[1024];
 
-    close(c);
+    while (true) {
+        cout << "Client: ";
+        cin.getline(msg, sizeof(msg));
+
+        send(s, msg, strlen(msg), 0);
+        send(s, "\n", 1, 0);
+
+        if (strcmp(msg, "exit") == 0) break;
+
+        memset(msg, 0, sizeof(msg));
+        int n = recv(s, msg, sizeof(msg) - 1, 0);
+
+        if (n <= 0) break;
+
+        cout << "Server: " << msg;
+        if (strcmp(msg, "exit\n") == 0) break;
+    }
+
     close(s);
+    return 0;
 }
 
-// to run
-// g++ client.cpp -o client
+// g++ Chat_TCP_Client.cpp -o Chat_TCP_Client
+// ./Chat_TCP_Client
