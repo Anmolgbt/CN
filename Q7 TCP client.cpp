@@ -43,5 +43,5 @@ int main() {
     return 0;
 }
 
-// g++ Chat_TCP_Client.cpp -o filename
-// ./Chat_TCP_Client
+// g++ filename -o filename
+// ./filename
