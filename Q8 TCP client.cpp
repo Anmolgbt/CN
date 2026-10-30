@@ -7,24 +7,39 @@ using namespace std;
 int main() {
     int s = socket(AF_INET, SOCK_STREAM, 0);
     sockaddr_in a{};
+
     a.sin_family = AF_INET;
     a.sin_port = htons(8080);
     inet_pton(AF_INET, "127.0.0.1", &a.sin_addr);
-    connect(s, (sockaddr*)&a, sizeof(a));
+
+    if (connect(s, (sockaddr*)&a, sizeof(a)) < 0) {
+        perror("Connection failed");
+        close(s);
+        return 1;
+    }
 
     double x, y, ans;
     char op;
-    cout << "Enter number operator number: ";
+
+    cout << "Enter expression (e.g. 10 + 5): ";
     cin >> x >> op >> y;
 
-    send(s, &x, sizeof(x), 0);
-    send(s, &y, sizeof(y), 0);
-    send(s, &op, sizeof(op), 0);
-    recv(s, &ans, sizeof(ans), 0);
+    if (send(s, &x, sizeof(x), 0) != sizeof(x) ||
+        send(s, &y, sizeof(y), 0) != sizeof(y) ||
+        send(s, &op, sizeof(op), 0) != sizeof(op)) {
+        cout << "Sending failed.\n";
+        close(s);
+        return 1;
+    }
 
-    cout << "Answer: " << ans << '\n';
+    if (recv(s, &ans, sizeof(ans), MSG_WAITALL) == sizeof(ans))
+        cout << "Client: Answer = " << ans << endl;
+    else
+        cout << "No result received.\n";
+
     close(s);
+    return 0;
 }
 
-// to run
-// g++ client.cpp -o client
+// g++ filename.cpp -o filename
+// ./filename
