@@ -63,5 +63,5 @@ int main() {
     return 0;
 }
 
-// g++ Chat_TCP_Server.cpp -o Chat_TCP_Server
+// g++ Chat_TCP_Server.cpp -o filename
 // ./Chat_TCP_Server
